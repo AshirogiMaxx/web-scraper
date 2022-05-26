@@ -39,12 +39,12 @@ py main.py
 
 The progam will start to stream the data on the console continuosly on the nex order:        
         
-		Product Description
-		Actual Price
+	Product Description
+	Actual Price
         Last Price
         Brand
-		Image thumbnail url
-		URL to the product
+	Image thumbnail url
+	URL to the product
         
 
 
