@@ -37,7 +37,7 @@ execute and start the projetct
 py main.py
 ```
 
-The progam will start to stream the data on the console continuosly on the nex order:        
+The progam will start to stream the data on the console continuosly on the next order:        
         
 		Product Description
 		Actual Price
@@ -45,6 +45,7 @@ The progam will start to stream the data on the console continuosly on the nex o
         Brand
 		Image thumbnail url
 		URL to the product
-        
+		
+apart from this data, the stream will be stored on the file products.txt.     
 
 

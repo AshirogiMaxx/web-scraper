@@ -72,7 +72,7 @@ def webscrap_products(url):
         Brand
 
     """
-
+    lines = []
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
 
@@ -93,6 +93,12 @@ def webscrap_products(url):
         brand = brand_result[0] if brand_result else ''
     else:
         brand = ''
+
+    lines.append('{}, {}, {}, {}, {}, {}\n'.format(description.text, price.get('content'),
+                                                   last_price, brand, url_image.img.get('src'), url))
+
+    with open('products.txt', 'a', encoding="utf-8") as f:
+        f.writelines(lines)
 
     return description.text, price.get('content'), last_price, brand, url_image.img.get('src'), url
 
