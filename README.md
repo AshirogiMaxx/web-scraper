@@ -39,13 +39,19 @@ py main.py
 
 The progam will start to stream the data on the console continuosly on the next order:        
         
-		Product Description
-		Actual Price
+	Product Description
+	Actual Price
         Last Price
         Brand
+<<<<<<< HEAD
 		Image thumbnail url
 		URL to the product
 		
 apart from this data, the stream will be stored on the file products.txt.     
+=======
+	Image thumbnail url
+	URL to the product
+        
+>>>>>>> b7541cba52c20d0b0a4c91da50930f56c19a0359
 
 
