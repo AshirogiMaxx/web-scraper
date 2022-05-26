@@ -31,3 +31,20 @@ Install the needed modules to run the project
 pip install -r requirements.txt
 ```
 
+execute and start the projetct
+
+```bash
+py main.py
+```
+
+The progam will start to stream the data on the console continuosly on the nex order:        
+        
+		Product Description
+		Actual Price
+        Last Price
+        Brand
+		Image thumbnail url
+		URL to the product
+        
+
+
