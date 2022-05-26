@@ -9,14 +9,13 @@ import logging
 from bs4 import BeautifulSoup
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
+import csv
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 headers = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36 QIHU 360SE'
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36'
 }
-
-MAX_THREADS = 50
 
 
 def category_reader():
@@ -62,30 +61,55 @@ def data_extractor(link, output):
 
 
 def webscrap_products(url):
-    """Execution of the workers to extract the data from each product"""
+    """Execution of the workers to extract the data from each product
+
+    Returns
+    -------
+        Product Description
+        Actual Price
+        Last Price
+        Image thumbnail url
+        Brand
+
+    """
+
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
+
+    last_price_pattern = "Precio anterior: \s*(\d+)"
+    brand_pattern = "(?<=Marca).*"
+
     description = soup.select_one('h1', class_='ui-pdp-title')
     url_image = soup.find('figure', class_='ui-pdp-gallery__figure')
-    price = soup.find('div', class_='ui-pdp-price mt-16 ui-pdp-price--size-large')
-    #previous_price
-    #model
-    print(price.text)
-    print(description.text)
-    print(url_image.img.get('src'))
+    all_prices = soup.find('div', class_='ui-pdp-price mt-16 ui-pdp-price--size-large')
+    price = soup.find("meta", itemprop="price")
+    brand_row = soup.find(re.compile("^tr"))
+
+    previous_price = re.findall(last_price_pattern, all_prices.text)
+    last_price = previous_price[0] if previous_price else ''
+
+    if brand_row: # check if the page has description table
+        brand_result = re.findall(brand_pattern, brand_row.text)
+        brand = brand_result[0] if brand_result else ''
+    else:
+        brand = ''
+
+    return description.text, price.get('content'), last_price, brand, url_image.img.get('src'), url
 
 
 def webscraper(categories):
-    """Start the process pool to execute the workers for each product """
+    """Start the process pool to execute the workers for each product
+
+    Returns
+    -------
+        A Print streaming  the final details about the products te format will be a tuple
+    """
+
     url_paths = []
     with open(os.path.join(sys.path[0], 'output.txt'), "r", encoding="utf8") as output_response:
         pages = output_response.read()
 
     soup = BeautifulSoup(pages, "html.parser")
-
-    '''laptops = soup.find('ol', class_="ui-search-layout ui-search-layout--stack").find_all('a')
-    for items in laptops:
-        print(items.get('href'))'''
 
     multipage_items = soup.find_all('li', class_="ui-search-layout__item")
     for items in multipage_items:
@@ -97,11 +121,10 @@ def webscraper(categories):
 
     logging.info("Web scraping started")
 
-    with ProcessPoolExecutor(max_workers=60) as executor:
-        futures = [executor.submit(webscrap_products, url) for url in url_paths]
-        results = []
-        for result in as_completed(futures):
-            results.append(result)
+    with ProcessPoolExecutor(max_workers=16) as executor:
+        for result in executor.map(webscrap_products, url_paths):
+            print(result)
+
     logging.info("Web scraping finished")
 
 
