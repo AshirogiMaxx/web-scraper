@@ -18,13 +18,16 @@ headers = {
 
 MAX_THREADS = 50
 
+
 def category_reader():
+    """Reads the initial categories to be read and extracted from mercado libre website"""
     with open(os.path.join(sys.path[0], 'categories.txt'), "r") as file:
         categories = file.read().splitlines()
     return categories
 
 
 def mercadolibre_webcrawler(categories):
+    """Create the threads for each category to extract the webpage data  """
     output = open('output.txt', 'w', encoding="utf-8")
     threads = []
     logging.info("Data Crawling is starting")
@@ -38,6 +41,7 @@ def mercadolibre_webcrawler(categories):
 
 
 def data_extractor(link, output):
+    """Execution of the workers to extract the data from categories and its pages"""
     output_lock = threading.Lock()
     temp = 1
     response = requests.get(link, headers=headers)
@@ -58,6 +62,7 @@ def data_extractor(link, output):
 
 
 def webscrap_products(url):
+    """Execution of the workers to extract the data from each product"""
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
     description = soup.select_one('h1', class_='ui-pdp-title')
@@ -71,6 +76,7 @@ def webscrap_products(url):
 
 
 def webscraper(categories):
+    """Start the process pool to execute the workers for each product """
     url_paths = []
     with open(os.path.join(sys.path[0], 'output.txt'), "r", encoding="utf8") as output_response:
         pages = output_response.read()
@@ -89,8 +95,6 @@ def webscraper(categories):
     for items in singlepage_items:
         url_paths.append(items.get('href'))
 
-    threads = min(MAX_THREADS, len(url_paths))
-
     logging.info("Web scraping started")
 
     with ProcessPoolExecutor(max_workers=60) as executor:
@@ -98,7 +102,6 @@ def webscraper(categories):
         results = []
         for result in as_completed(futures):
             results.append(result)
-    #print(result)
     logging.info("Web scraping finished")
 
 
@@ -106,19 +109,3 @@ if __name__ == "__main__":
     categories = category_reader()
     mercadolibre_webcrawler(categories)
     webscraper(categories)
-
-
-    '''
-    # root-app > div > div.ui-search-main.ui-search-main--exhibitor > section > div.ui-search-pagination > ul > li.andes-pagination__button.andes-pagination__button--next
-    < li
-    movies = soup.find('table', {
-    'class': 'table'
-  })
-  .find_all('a')
-
-    class ="andes-pagination__button andes-pagination__button--next" > < a href="https://laptops.mercadolibre.com.mx/laptops-accesorios/_Desde_451_NoIndex_True" class ="andes-pagination__link ui-search-link" title="Siguiente" role="button" rel="nofollow" > < span class ="andes-pagination__arrow-title" > Siguiente < / span > < span class ="andes-pagination__arrow" > < / span > < / a > < / li >
-    < a
-    href = "https://laptops.mercadolibre.com.mx/laptops-accesorios/_Desde_451_NoIndex_True"
-
-
-    class ="andes-pagination__link ui-search-link" title="Siguiente" role="button" rel="nofollow" > < span class ="andes-pagination__arrow-title" > Siguiente < / span > < span class ="andes-pagination__arrow" > < / span > < / a >'''
